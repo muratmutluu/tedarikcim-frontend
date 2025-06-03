@@ -12,6 +12,17 @@ import {
   PurchaseSupplierTransactionSchema,
 } from "@/app/(root)/suppliers/[id]/transactions/_lib/validation";
 
+/* AUTH */
+export const login = async (data: { username: string; password: string }) => {
+  const response = await axiosInstance.post("/auth/login", data);
+  return response.data;
+};
+
+export const logout = async () => {
+  const response = await axiosInstance.post("/auth/logout");
+  return response.data;
+};
+
 /* CUSTOMERS */
 export const getCustomerById = async (customerId: number): Promise<Customer> => {
   const response = await axiosInstance.get(`/customers/${customerId}`);
@@ -85,12 +96,42 @@ export const deleteCustomerTransaction = async (transactionId: number) => {
   return response.data;
 };
 
+/* CUSTOMER STATS */
+export const getCustomerStats = async (customerId: number) => {
+  const response = await axiosInstance.get(`/customers/${customerId}/stats`);
+  return response.data;
+};
+
 export const getCustomerDailyTransactionsTotal = async (customerId: number, days = 7) => {
   const response = await axiosInstance.get(
     `/customers/${customerId}/stats/daily-transactions-total`,
     {
       params: {
         days,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const getCustomerMonthlyTransactionsTotal = async (customerId: number, year: number) => {
+  const response = await axiosInstance.get(
+    `/customers/${customerId}/stats/monthly-transactions-total`,
+    {
+      params: {
+        year,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const getCustomerMonthlyTransactionsAverage = async (customerId: number, year: number) => {
+  const response = await axiosInstance.get(
+    `/customers/${customerId}/stats/monthly-transactions-average`,
+    {
+      params: {
+        year,
       },
     }
   );
@@ -219,6 +260,15 @@ export const getDailyTransactionsTotal = async (days = 7) => {
 
 export const getMonthlyTransactionsAverage = async (year: number) => {
   const response = await axiosInstance.get("/dashboard/monthly-transactions-average", {
+    params: {
+      year,
+    },
+  });
+  return response.data;
+};
+
+export const getMonthlyTransactionsTotal = async (year: number) => {
+  const response = await axiosInstance.get("/dashboard/monthly-transactions-total", {
     params: {
       year,
     },

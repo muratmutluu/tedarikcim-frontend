@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { deleteCustomerTransaction } from "@/lib/api";
 import type { CustomerTransaction } from "@/types";
+import { DialogClose } from "@radix-ui/react-dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Row } from "@tanstack/react-table";
 import { Loader, Trash } from "lucide-react";
@@ -71,7 +72,9 @@ export function DeleteTransactionDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline">Vazgeç</Button>
+          <DialogClose asChild>
+            <Button variant="outline">Vazgeç</Button>
+          </DialogClose>
           <Button
             aria-label="Delete selected customer"
             variant="destructive"

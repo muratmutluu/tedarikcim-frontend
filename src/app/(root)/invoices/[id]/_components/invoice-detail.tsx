@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TurkishNumberConverter } from "@/lib/utils";
+import { formatCurrency, TurkishNumberConverter } from "@/lib/utils";
 import { Invoice } from "@/types";
 import { format } from "date-fns";
 import { FileText } from "lucide-react";
@@ -30,9 +30,9 @@ export function InvoiceDetail({ data }: { data: Invoice }) {
 
   return (
     <>
-      <Button onClick={() => toPDF()} className="mb-4">
-        İndir
-      </Button>
+      <div className="flex justify-end mb-2">
+        <Button onClick={() => toPDF()}>İndir</Button>
+      </div>
       <div ref={targetRef}>
         <Card className="pt-0 rounded-t-none">
           <CardHeader className="bg-primary text-primary-foreground p-4">
@@ -152,9 +152,9 @@ export function InvoiceDetail({ data }: { data: Invoice }) {
                       <TableHead className="text-primary-foreground font-bold text-right">
                         Birim Fiyat
                       </TableHead>
-                      {/* <TableHead className="text-primary-foreground font-bold text-right">
+                      <TableHead className="text-primary-foreground font-bold text-right">
                         KDV
-                      </TableHead> */}
+                      </TableHead>
                       <TableHead className="text-primary-foreground text-right font-bold">
                         Toplam Tutar
                       </TableHead>
@@ -166,9 +166,14 @@ export function InvoiceDetail({ data }: { data: Invoice }) {
                         <TableCell className="text-muted-foreground">{index + 1}</TableCell>
                         <TableCell className="capitalize">{item.description}</TableCell>
                         <TableCell className="text-right">{item.quantity}</TableCell>
-                        <TableCell className="text-right">{item.unitPrice.toFixed(2)} TL</TableCell>
                         <TableCell className="text-right">
-                          {item.totalAmount.toFixed(2)} TL
+                          {formatCurrency(item.unitPrice)} TL
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(item.taxAmount)} TL | ({item.taxRate.toFixed(2)} %)
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(item.lineTotalAmount)} TL
                         </TableCell>
                       </TableRow>
                     ))}
@@ -205,20 +210,24 @@ export function InvoiceDetail({ data }: { data: Invoice }) {
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span>Mal Hizmet Toplam Tutarı</span>
-                      <span className="font-semibold">{data.subTotalAmount.toFixed(2)} TL</span>
+                      <span className="font-semibold">
+                        {formatCurrency(data.subTotalAmount)} TL
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>KDV % 20</span>
-                      <span className="font-semibold">{data.taxAmount.toFixed(2)} TL</span>
+                      <span className="font-semibold">
+                        {formatCurrency(data.totalTaxAmount)} TL
+                      </span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-sm">
                       <span>Vergiler Dahil Toplam Tutar</span>
-                      <span className="font-semibold">{data.totalAmount.toFixed(2)} TL</span>
+                      <span className="font-semibold">{formatCurrency(data.totalAmount)} TL</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold text-blue-600">
                       <span>Ödenecek Tutar</span>
-                      <span>{data.totalAmount.toFixed(2)} TL</span>
+                      <span>{formatCurrency(data.totalAmount)} TL</span>
                     </div>
                     <div className="flex justify-between font-mono capitalize">
                       <span className="font-semibold">Yalnız:</span>

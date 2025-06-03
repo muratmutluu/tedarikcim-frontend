@@ -1,9 +1,7 @@
 "use client";
 
-import * as React from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
@@ -11,6 +9,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+import { CardSkeleton } from "@/components/card-skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Select,
   SelectContent,
@@ -18,9 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useCustomerDailyTransactionsTotal } from "@/hooks/customers/use-customer-stats";
-import { CardSkeleton } from "@/components/card-skeleton";
 
 const chartConfig = {
   sale: {
@@ -33,7 +34,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function CustomerAreaChart({ customerId }: { customerId: number }) {
+export function CustomerLineChart({ customerId }: { customerId: number }) {
   const [timeRange, setTimeRange] = React.useState("30d");
 
   const getDaysFromRange = (range: string) => {
@@ -48,7 +49,6 @@ export function CustomerAreaChart({ customerId }: { customerId: number }) {
         return 30;
     }
   };
-
   const isMobile = useIsMobile();
   React.useEffect(() => {
     if (isMobile) {
@@ -63,7 +63,7 @@ export function CustomerAreaChart({ customerId }: { customerId: number }) {
     isError,
   } = useCustomerDailyTransactionsTotal(customerId, days);
 
-  console.log("transactions2", transactions);
+  console.log("transactions", transactions);
 
   const chartData = transactions.map((transaction) => ({
     date: transaction.transactionDate,
@@ -82,8 +82,9 @@ export function CustomerAreaChart({ customerId }: { customerId: number }) {
   return (
     <Card className="@container/card">
       <CardHeader className="relative">
-        <CardTitle>Günlere Göre Toplam Müşteri Başına İşlemler</CardTitle>
+        <CardTitle>Günlere Göre Toplam Satış ve Ödeme</CardTitle>
         <CardDescription>
+          {" "}
           <span className="@[540px]/card:block hidden">
             Son {timeRange === "7d" ? "7 gün" : timeRange === "90d" ? "3 ay" : "30 gün"} toplam
           </span>
@@ -129,24 +130,13 @@ export function CustomerAreaChart({ customerId }: { customerId: number }) {
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="fillSale" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-sale)" stopOpacity={1.0} />
-                <stop offset="95%" stopColor="var(--color-sale)" stopOpacity={0.1} />
-              </linearGradient>
-              <linearGradient id="fillPayment" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-payment)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="var(--color-payment)" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
+          <LineChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value);
                 return date.toLocaleDateString("tr-TR", {
@@ -169,14 +159,21 @@ export function CustomerAreaChart({ customerId }: { customerId: number }) {
                 />
               }
             />
-            <Area
+            <Line
               dataKey="payment"
-              type="natural"
-              fill="url(#fillPayment)"
+              type="monotone"
               stroke="var(--color-payment)"
+              strokeWidth={2}
+              dot={false}
             />
-            <Area dataKey="sale" type="natural" fill="url(#fillSale)" stroke="var(--color-sale)" />
-          </AreaChart>
+            <Line
+              dataKey="sale"
+              type="monotone"
+              stroke="var(--color-sale)"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
         </ChartContainer>
       </CardContent>
     </Card>

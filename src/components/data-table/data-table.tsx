@@ -1,15 +1,16 @@
 import { cn } from "@/lib/utils";
 import { type Table as TanstackTable, flexRender } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import React from "react";
 
 interface DataTableProps<TData> extends React.ComponentProps<"div"> {
   table: TanstackTable<TData>;
 }
 export function DataTable<TData>({ table, children, className, ...props }: DataTableProps<TData>) {
   return (
-    <div className={cn("flex flex-col gap-2 w-full mx-auto overflow-auto", className)} {...props}>
+    <div className={cn("flex flex-col gap-2 w-full mx-auto", className)} {...props}>
       {children}
-      <div className="flex max-h-[calc(100vh-200px)] [&>div]:border [&>div]:rounded-md">
+      <div className="flex max-h-[calc(100vh-200px)] [&>div]:border [&>div]:rounded-md overflow-auto">
         <Table className="border-separate border-spacing-0 [&_th]:border-b [&_tr:not(:last-child)_td]:border-b [&_tr>:not(:last-child)]:border-r">
           <TableHeader className="sticky top-0 backdrop-blur-lg z-10 h-12">
             {table.getHeaderGroups().map((headerGroup) => (

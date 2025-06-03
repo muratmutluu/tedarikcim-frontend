@@ -24,11 +24,11 @@ export default function LoginPage() {
       </div>
       <div className="bg-muted relative hidden lg:block">
         <Image
-          src="/placeholder.svg"
+          src="/hero.png"
           alt="Image"
           width={600}
           height={600}
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale  grayscale-50"
         />
       </div>
     </div>

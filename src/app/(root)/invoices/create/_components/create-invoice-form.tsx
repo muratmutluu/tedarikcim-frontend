@@ -38,15 +38,17 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
       invoiceDate: new Date().toISOString().split("T")[0],
       description: "",
       subTotalAmount: 0,
-      taxRate: 20,
-      taxAmount: 0,
+      totalTaxAmount: 0,
       totalAmount: 0,
       invoiceItems: [
         {
           description: "",
           quantity: 1,
           unitPrice: 0,
-          totalAmount: 0,
+          lineSubTotalAmount: 0,
+          taxRate: 20, // Default %20 KDV
+          taxAmount: 0,
+          lineTotalAmount: 0,
         },
       ],
     },
@@ -58,6 +60,7 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
   });
 
   const [selectedCustomer, setSelectedCustomer] = React.useState<Customer | null>(null);
+  const [globalTaxRate, setGlobalTaxRate] = React.useState<number>(20);
   const router = useRouter();
 
   const handleCustomerChange = (customer: Customer | null) => {
@@ -74,7 +77,10 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
       description: "",
       quantity: 1,
       unitPrice: 0,
-      totalAmount: 0,
+      lineSubTotalAmount: 0,
+      taxRate: globalTaxRate,
+      taxAmount: 0,
+      lineTotalAmount: 0,
     });
   };
 
@@ -88,8 +94,15 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
   const calculateItemTotal = (index: number) => {
     const quantity = form.watch(`invoiceItems.${index}.quantity`);
     const unitPrice = form.watch(`invoiceItems.${index}.unitPrice`);
-    const total = quantity * unitPrice;
-    form.setValue(`invoiceItems.${index}.totalAmount`, toFixedNumber(total, 2));
+    const taxRate = form.watch(`invoiceItems.${index}.taxRate`);
+
+    const lineSubTotal = quantity * unitPrice;
+    const lineTaxAmount = lineSubTotal * (taxRate / 100);
+    const lineTotal = lineSubTotal + lineTaxAmount;
+
+    form.setValue(`invoiceItems.${index}.lineSubTotalAmount`, toFixedNumber(lineSubTotal, 2));
+    form.setValue(`invoiceItems.${index}.taxAmount`, toFixedNumber(lineTaxAmount, 2));
+    form.setValue(`invoiceItems.${index}.lineTotalAmount`, toFixedNumber(lineTotal, 2));
 
     // Genel toplamları hesapla
     calculateTotals();
@@ -98,12 +111,12 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
   // Genel toplamları hesaplama
   const calculateTotals = React.useCallback(() => {
     const items = form.getValues("invoiceItems");
-    const subTotal = items.reduce((sum, item) => sum + item.totalAmount, 0);
-    const tax = subTotal * (form.getValues("taxRate") / 100);
-    const total = subTotal + tax;
+    const subTotal = items.reduce((sum, item) => sum + item.lineSubTotalAmount, 0);
+    const totalTax = items.reduce((sum, item) => sum + item.taxAmount, 0);
+    const total = items.reduce((sum, item) => sum + item.lineTotalAmount, 0);
 
     form.setValue("subTotalAmount", toFixedNumber(subTotal, 2));
-    form.setValue("taxAmount", toFixedNumber(tax, 2));
+    form.setValue("totalTaxAmount", toFixedNumber(totalTax, 2));
     form.setValue("totalAmount", toFixedNumber(total, 2));
   }, [form]);
 
@@ -195,19 +208,20 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="taxRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>KDV Oranı %</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="number" step="0.01" min="0" max="100" />
-                      </FormControl>
-                      <FormMessage className="col-span-full" />
-                    </FormItem>
-                  )}
-                />
+                <FormItem>
+                  <FormLabel>Genel KDV Oranı %</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={globalTaxRate}
+                      onChange={(e) => setGlobalTaxRate(Number(e.target.value))}
+                      placeholder="20"
+                    />
+                  </FormControl>
+                </FormItem>
                 <FormField
                   control={form.control}
                   name="description"
@@ -227,6 +241,7 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
                 />
               </CardContent>
             </Card>
+
             <Card className="col-span-full">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Ürün Detayları</CardTitle>
@@ -247,7 +262,7 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
                       key={field.id}
                       className="grid grid-cols-12 gap-4 items-end p-4 border rounded-lg"
                     >
-                      <div className="col-span-5">
+                      <div className="col-span-4">
                         <FormField
                           control={form.control}
                           name={`invoiceItems.${index}.description`}
@@ -263,7 +278,7 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
                         />
                       </div>
 
-                      <div className="col-span-2">
+                      <div className="col-span-1">
                         <FormField
                           control={form.control}
                           name={`invoiceItems.${index}.quantity`}
@@ -275,7 +290,7 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
                                   {...field}
                                   type="number"
                                   onChange={(e) => {
-                                    field.onChange(Number(e.target.value));
+                                    field.onChange(Number(e.target.value) || "");
                                     calculateItemTotal(index);
                                   }}
                                 />
@@ -297,8 +312,9 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
                                 <Input
                                   {...field}
                                   type="number"
+                                  step="0.01"
                                   onChange={(e) => {
-                                    field.onChange(Number(e.target.value));
+                                    field.onChange(Number(e.target.value) || "");
                                     calculateItemTotal(index);
                                   }}
                                 />
@@ -309,13 +325,70 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
                         />
                       </div>
 
-                      <div className="col-span-2">
+                      <div className="col-span-1">
                         <FormField
                           control={form.control}
-                          name={`invoiceItems.${index}.totalAmount`}
+                          name={`invoiceItems.${index}.taxRate`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>KDV %</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  onChange={(e) => {
+                                    field.onChange(Number(e.target.value) || "");
+                                    calculateItemTotal(index);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="col-span-1">
+                        <FormField
+                          control={form.control}
+                          name={`invoiceItems.${index}.lineSubTotalAmount`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Ara Toplam</FormLabel>
+                              <FormControl>
+                                <Input {...field} type="number" disabled />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="col-span-1">
+                        <FormField
+                          control={form.control}
+                          name={`invoiceItems.${index}.taxAmount`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>KDV Tutarı</FormLabel>
+                              <FormControl>
+                                <Input {...field} type="number" disabled />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="col-span-1">
+                        <FormField
+                          control={form.control}
+                          name={`invoiceItems.${index}.lineTotalAmount`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Toplam</FormLabel>
                               <FormControl>
                                 <Input {...field} type="number" disabled />
                               </FormControl>
@@ -342,6 +415,7 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
                 </div>
               </CardContent>
             </Card>
+
             <Card className="col-span-full">
               <CardHeader>
                 <CardTitle>Toplam Tutarlar</CardTitle>
@@ -358,7 +432,7 @@ export function CreateInvoiceForm({ customers }: CreateInvoiceFormProps) {
                   <FormItem>
                     <FormLabel>Toplam KDV Tutarı</FormLabel>
                     <div className="font-bold text-right border px-3 py-2 rounded-md bg-muted">
-                      {formatCurrency(form.watch("taxAmount"), { min: 2, max: 2 })}
+                      {formatCurrency(form.watch("totalTaxAmount"), { min: 2, max: 2 })}
                     </div>
                   </FormItem>
 

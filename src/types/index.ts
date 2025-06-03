@@ -77,7 +77,7 @@ export type Invoice = {
   invoiceNumber: string;
   description: string;
   subTotalAmount: number;
-  taxAmount: number;
+  totalTaxAmount: number;
   totalAmount: number;
   customerId: number;
   customer: {
@@ -100,17 +100,43 @@ export type InvoiceItem = {
   createdAt: string;
   updatedAt: string;
   description: string;
-  totalAmount: number;
   quantity: number;
   unitPrice: number;
+  lineSubTotalAmount: number;
+  taxRate: number;
+  taxAmount: number;
+  lineTotalAmount: number;
   invoiceId: number;
 };
 
 /* DASHBOARD */
 export type OrderType = "highest" | "lowest";
 
+export type DashboardData = {
+  totalCustomers: number;
+  totalSuppliers: number;
+  totalInvoices: number;
+  totalCustomerTransactionAmount: number;
+  totalCustomerReceivedAmount: number;
+  totalSupplierTransactionAmount: number;
+  totalSupplierPaidAmount: number;
+};
+
+export type CustomerStats = {
+  totalTransactionCount: number;
+  totalInvoiceCount: number;
+  totalAmount: number;
+  receivedAmount: number;
+};
+
 export type DailyTransactionTotal = {
   transactionDate: string;
+  totalAmount: number;
+  receivedAmount: number;
+};
+
+export type MonthlyTransactionTotal = {
+  month: number;
   totalAmount: number;
   receivedAmount: number;
 };

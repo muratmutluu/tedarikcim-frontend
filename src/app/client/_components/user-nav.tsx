@@ -1,6 +1,8 @@
 "use client";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { Button } from "../ui/button";
+
+import { ChevronsUpDown } from "lucide-react";
+import { useLogout, useUser } from "@/hooks/auth/useAuth";
+import { getInitialsForAvatar } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,11 +10,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { data } from "@/lib/nav-data";
-import { ChevronsUpDown } from "lucide-react";
-import { useLogout } from "@/hooks/auth/useAuth";
-import { getInitialsForAvatar } from "@/lib/utils";
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function UserNav() {
   const { mutate: logout } = useLogout();
@@ -21,6 +21,8 @@ export function UserNav() {
     logout();
     window.location.href = "/login"; // Redirect to login page after logout
   };
+
+  const { data } = useUser();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -30,12 +32,11 @@ export function UserNav() {
         >
           <Avatar className="h-8 w-8 ring-2 ring-accent">
             <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-semibold">
-              {getInitialsForAvatar(data.user.name)}
+              {getInitialsForAvatar(data.username)}
             </AvatarFallback>
           </Avatar>
           <div className="max-md:hidden grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">{data.user.name}</span>
-            <span className="truncate text-xs">{data.user.email}</span>
+            <span className="truncate font-semibold">{data.username}</span>
           </div>
           <ChevronsUpDown className="ml-auto size-4" />
         </Button>
@@ -46,13 +47,7 @@ export function UserNav() {
             <p className="text-sm font-medium leading-none">Ayarlar</p>
           </div>
         </DropdownMenuLabel>
-        {/* <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem>
-        </DropdownMenuGroup> */}
+
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>Çıkış Yap</DropdownMenuItem>
       </DropdownMenuContent>

@@ -40,7 +40,7 @@ interface UpdateTransactionSheetProps extends React.ComponentPropsWithRef<typeof
   transaction: Row<SupplierTransaction>["original"] | null;
 }
 
-export function UpdateSaleTransactionSheet({ transaction, ...props }: UpdateTransactionSheetProps) {
+export function UpdatePurchaseTransactionSheet({ transaction, ...props }: UpdateTransactionSheetProps) {
   const form = useForm<PurchaseSupplierTransactionSchema>({
     resolver: zodResolver(purchaseSupplierTransactionSchema),
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import type { SupplierTransaction } from "@/types";
+import { SupplierTransactionType, type SupplierTransaction } from "@/types";
 import type { DataTableRowAction } from "@/types/data-table";
 import * as React from "react";
 import { getTransactionsTableColumns } from "./transactions-table-columns";
@@ -13,6 +13,10 @@ import {
   CreatePaymentSupplierTransactionSheet,
   CreatePurchaseSupplierTransactionSheet,
 } from "./create-transaction-sheet";
+import {
+  UpdatePaymentTransactionSheet,
+  UpdatePurchaseTransactionSheet,
+} from "./update-transaction-sheet";
 
 export function TransactionsTable({
   data,
@@ -45,7 +49,7 @@ export function TransactionsTable({
         </DataTableToolbar>
       </DataTable>
 
-      {/* {rowAction?.variant === "update" &&
+      {rowAction?.variant === "update" &&
         (rowAction?.row.original?.transactionType === SupplierTransactionType.PURCHASE ? (
           <UpdatePurchaseTransactionSheet
             open
@@ -58,7 +62,7 @@ export function TransactionsTable({
             transaction={rowAction.row.original}
             onOpenChange={() => setRowAction(null)}
           />
-        ) : null)} */}
+        ) : null)}
 
       {rowAction?.variant === "delete" && (
         <DeleteTransactionDialog

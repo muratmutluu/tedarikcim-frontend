@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,18 +10,19 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import React from "react";
 import { useMonthlyTransactionsAverage } from "@/hooks/dashboard/use-monthly-transactions-average";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { CardSkeleton } from "@/components/card-skeleton";
+import { useMonthlyTransactionsTotal } from "@/hooks/dashboard/use-monthly-transactions-total";
 
 const chartConfig = {
-  avgTotalAmount: {
-    label: "Ort. Satış",
+  // Ortalama için
+  totalAmount: {
+    label: "Satış",
     color: "var(--chart-1)",
   },
-  avgReceivedAmount: {
-    label: "Ort. Ödeme",
+  receivedAmount: {
+    label: "Ödeme",
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
@@ -29,6 +31,7 @@ export function DashboardBarChart() {
   const [selectedYear, setSelectedYear] = React.useState<"before-last" | "last" | "current">(
     "current"
   );
+  const [viewType, setViewType] = React.useState<"average" | "total">("average");
 
   const yearNumber =
     selectedYear === "current"
@@ -37,15 +40,39 @@ export function DashboardBarChart() {
       ? new Date().getFullYear() - 1
       : new Date().getFullYear() - 2;
 
-  const { data: transactions = [], isLoading, isError } = useMonthlyTransactionsAverage(yearNumber);
+  const {
+    data: avgTransactions = [],
+    isLoading: isAvgLoading,
+    isError: isAvgError,
+  } = useMonthlyTransactionsAverage(yearNumber);
+
+  const {
+    data: totalTransactions = [],
+    isLoading: isTotalLoading,
+    isError: isTotalError,
+  } = useMonthlyTransactionsTotal(yearNumber);
+
+  const isLoading = isAvgLoading || isTotalLoading;
+  const isError = isAvgError || isTotalError;
 
   const chartData = React.useMemo(() => {
-    return transactions.map((item) => ({
-      month: item.month,
-      avgTotalAmount: item.avgTotalAmount,
-      avgReceivedAmount: item.avgReceivedAmount,
-    }));
-  }, [transactions]);
+    if (viewType === "average") {
+      return avgTransactions.map((item) => ({
+        month: item.month,
+        totalAmount: item.avgTotalAmount,
+        receivedAmount: item.avgReceivedAmount,
+      }));
+    } else {
+      // Debug için
+      return totalTransactions.map((item) => ({
+        month: item.month,
+        totalAmount: item.totalAmount,
+        receivedAmount: item.receivedAmount,
+      }));
+    }
+  }, [avgTransactions, totalTransactions, viewType]);
+
+  console.log("Chart Data:", chartData);
 
   if (isLoading) {
     return <CardSkeleton contentClassName="h-[250px]" />;
@@ -58,9 +85,27 @@ export function DashboardBarChart() {
   return (
     <Card className="@container/card justify-between">
       <CardHeader className="relative">
-        <CardTitle>Aylara Göre Ortalama Müşteri İşlemleri</CardTitle>
+        <CardTitle>
+          Aylara Göre {viewType === "average" ? "Ortalama" : "Toplam"} Müşteri İşlemleri
+        </CardTitle>
         <CardDescription>{yearNumber} yılı</CardDescription>
-        <div className="absolute right-4 top-4">
+        <div className="absolute right-4 top-4 flex gap-2">
+          {/* Görünüm Tipi Toggle */}
+          <ToggleGroup
+            type="single"
+            value={viewType}
+            onValueChange={(value) => value && setViewType(value as "average" | "total")}
+            variant="outline"
+          >
+            <ToggleGroupItem value="average" className="h-8 px-3">
+              Ortalama
+            </ToggleGroupItem>
+            <ToggleGroupItem value="total" className="h-8 px-3">
+              Toplam
+            </ToggleGroupItem>
+          </ToggleGroup>
+
+          {/* Yıl Toggle */}
           <ToggleGroup
             type="single"
             value={selectedYear}
@@ -95,9 +140,9 @@ export function DashboardBarChart() {
                 return date.toLocaleDateString("tr-TR", { month: "short" });
               }}
             />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed" />} />
-            <Bar dataKey="avgTotalAmount" fill="var(--chart-1)" radius={4} />
-            <Bar dataKey="avgReceivedAmount" fill="var(--chart-2)" radius={4} />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+            <Bar dataKey="totalAmount" fill="var(--chart-1)" radius={4} />
+            <Bar dataKey="receivedAmount" fill="var(--chart-2)" radius={4} />
           </BarChart>
         </ChartContainer>
       </CardContent>

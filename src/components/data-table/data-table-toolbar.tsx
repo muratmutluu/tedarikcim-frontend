@@ -4,9 +4,10 @@ import type { Column, Table } from "@tanstack/react-table";
 import { Input } from "../ui/input";
 import * as React from "react";
 import { Button } from "../ui/button";
-import { X } from "lucide-react";
+import { Sheet, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import debounce from "lodash.debounce";
+import { exportTableToExcel } from "@/lib/export-xlsx";
 
 interface DataTableToolbarProps<TData> extends React.ComponentProps<"div"> {
   table: Table<TData>;
@@ -54,7 +55,22 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <div className="flex items-center gap-2">{children}</div>
+      <div className="flex items-center gap-2">
+        {" "}
+        <Button
+          onClick={() =>
+            exportTableToExcel(table, {
+              filename: "my-data",
+              excludeColumns: ["select", "actions"],
+              onlySelected: false,
+            })
+          }
+          className="bg-emerald-600 hover:bg-emerald-700 text-white h-8"
+        >
+          <Sheet /> Excel Aktar
+        </Button>
+        {children}
+      </div>
     </div>
   );
 }
