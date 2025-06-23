@@ -1,3 +1,6 @@
+![YBS 4002 Bitirme Projesi Posteri Tedarikçim Murat Mutlu 2021469034-1](https://github.com/user-attachments/assets/575910c8-e346-4098-a7f8-62379015024a)
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
