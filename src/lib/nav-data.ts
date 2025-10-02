@@ -28,8 +28,8 @@ export const data = {
       icon: Factory,
     },
     {
-      title: "Ayarlar",
-      url: "/settings",
+      title: "Kullanıcı Oluştur",
+      url: "/create-user",
       icon: Settings,
     },
   ],

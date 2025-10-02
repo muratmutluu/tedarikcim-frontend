@@ -25,4 +25,3 @@ export const updateCustomerSchema = createCustomerSchema;
 
 export type CreateCustomerSchema = z.infer<typeof createCustomerSchema>;
 export type UpdateCustomerSchema = z.infer<typeof updateCustomerSchema>;
-  

@@ -47,6 +47,10 @@ export const useLogout = () => {
       localStorage.removeItem("accessToken");
       queryClient.clear();
     },
+    onError: () => {
+      // Hata durumunda da cache'i temizle
+      queryClient.clear();
+    },
   });
 };
 

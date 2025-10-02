@@ -11,6 +11,7 @@ import {
   PaymentSupplierTransactionSchema,
   PurchaseSupplierTransactionSchema,
 } from "@/app/(root)/suppliers/[id]/transactions/_lib/validation";
+import { CreateCustomerUserSchema } from "@/app/(root)/create-user/_lib/validation";
 
 /* AUTH */
 export const login = async (data: { username: string; password: string }) => {
@@ -20,6 +21,11 @@ export const login = async (data: { username: string; password: string }) => {
 
 export const logout = async () => {
   const response = await axiosInstance.post("/auth/logout");
+  return response.data;
+};
+
+export const createCustomerUser = async (data: CreateCustomerUserSchema) => {
+  const response = await axiosInstance.post("/users", data);
   return response.data;
 };
 

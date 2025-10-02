@@ -13,13 +13,23 @@ import { data } from "@/lib/nav-data";
 import { ChevronsUpDown } from "lucide-react";
 import { useLogout } from "@/hooks/auth/useAuth";
 import { getInitialsForAvatar } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export function UserNav() {
+  const router = useRouter();
   const { mutate: logout } = useLogout();
 
   const handleLogout = () => {
-    logout();
-    window.location.href = "/login"; // Redirect to login page after logout
+    // Önce token'ı sil
+    localStorage.removeItem("accessToken");
+
+    logout(undefined, {
+      onSettled: () => {
+        // Mutation tamamlandıktan sonra yönlendir
+        router.push("/login");
+        router.refresh(); // Sayfayı yenile
+      },
+    });
   };
   return (
     <DropdownMenu>

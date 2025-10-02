@@ -30,8 +30,13 @@ export function InvoiceDetail({ data }: { data: Invoice }) {
 
   return (
     <>
-      <div className="flex justify-end mb-2">
-        <Button onClick={() => toPDF()}>İndir</Button>
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r to-emerald-500 from-blue-400 md:text-2xl lg:text-3xl">
+          Fatura Detayları
+        </h1>
+        <Button className="bg-amber-500 hover:bg-amber-500/90" onClick={() => toPDF()}>
+          <FileText /> PDF Olarak İndir
+        </Button>
       </div>
       <div ref={targetRef}>
         <Card className="pt-0 rounded-t-none">

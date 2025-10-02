@@ -54,9 +54,6 @@ export function DataTableToolbar<TData>({
             Sıfırla
           </Button>
         )}
-      </div>
-      <div className="flex items-center gap-2">
-        {" "}
         <Button
           onClick={() =>
             exportTableToExcel(table, {
@@ -69,8 +66,8 @@ export function DataTableToolbar<TData>({
         >
           <Sheet /> Excel Aktar
         </Button>
-        {children}
       </div>
+      <div className="flex items-center gap-2">{children}</div>
     </div>
   );
 }
